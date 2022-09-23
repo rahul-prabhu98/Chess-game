@@ -1,0 +1,22 @@
+{
+  "name": "chessgamenormal",
+  "version": "1.0.0",
+  "description": "Basic Chess Game build using ChessBoard.js Chess.js and Socket.io libraries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darshan-dedhia/chessgame.git"
+  },
+  "keywords": [
+    "Chess"
+  ],
+  "author": "Darshan Dedhia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darshan-dedhia/chessgame/issues"
+  },
+  "homepage": "https://github.com/darshan-dedhia/chessgame#readme"
+}
