@@ -1,0 +1,53 @@
+@font-face {
+    font-family: "myfont";
+    src: url("CHLORINR.woff") format('woff');
+}
+
+.headBar{
+    background: #2ecc71;
+    height: 65px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 20% 60% 20%;
+    text-align: center;
+    align-content: center;
+}
+
+.boardposition{
+    margin-top: 5%;
+    margin-left: 30%;
+}
+
+button {
+    background-color: #34495e; /* Green */
+    border: none;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+}
+
+.txtjoingame{
+    border: none;
+    border-bottom: 2px solid #34495e;
+    background-color: #2ecc71;
+    color: #34495e;
+    font-weight: bold;
+    width: 50px;
+}
+
+.header{
+    font-family: myfont;
+    font-size: 50px;
+    color: #34495e;
+}
+
+.gameId{
+    font-size: 20px;
+    color: #34495e;
+}

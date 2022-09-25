@@ -7,20 +7,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
     <script src = "./chessboard/js/chessboard-1.0.0.js"></script>
     <link rel="stylesheet" href="./chessboard/css/chessboard.css">
+    <link rel="stylesheet" href = "./style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 </head>
 <body>
+<div class = "headBar">
+    <div class = "newgame">
+        <button onclick="newGame()" class = "button" id = "btnNewGame">New Game</button> &nbsp; &nbsp; &nbsp;
+        <label class = "gameId" name = "gameId" id="gameId" >Game ID:</label>
+    </div>
+    <div class = "header">CHESS GAME</div>
+    <div class = "joingame">
+        <input type="text" id="txtJoinGame" class="txtjoingame">
+        <button onclick="joinGame()" id="btnJoinGame">Join Game</button>
+    </div>
+</div>
 <div class="container">
-    <div id="chessboard" style="width: 400px"></div>
-    <button onclick="newGame()">New Game</button><br>
-    <input type="text" id="txtJoinGame">
-    <button onclick="joinGame()">Join Game</button>
-    <label>Status:</label>
-    <div id="status"></div>
-    <label>FEN:</label>
-    <div id="fen"></div>
-    <label>PGN:</label>
-    <div id="pgn"></div>
+    <label class = "gameId">Status:</label>&nbsp; &nbsp;<label id="status" class = "gameId"></label><br>
+    <labe class = "gameId">Your Color:</labe>&nbsp; &nbsp;<label id="pieceColor" class = "gameId"></label>
+    <div id="chessboard" style="width: 500px" class = "boardposition"></div>
 </div>
 
 <script src="./game.js"></script>

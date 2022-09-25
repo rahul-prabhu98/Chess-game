@@ -5,6 +5,10 @@ let $status = $('#status');
 let $fen = $('#fen');
 let $pgn = $('#pgn');
 let txtJoinGame = document.getElementById('txtJoinGame');
+let lblGameId = document.getElementById('gameId');
+let btnNewGame = document.getElementById('btnNewGame');
+let btnJoinGame = document.getElementById('btnJoinGame');
+let lblPieceColor = document.getElementById('pieceColor');
 
 let socket = io('/', {transports: ['websocket'], upgrade: false});
 let color;
@@ -18,7 +22,11 @@ socket.on('connection', () => {
 
 socket.on("newGameSuccess", function (gameRoomId) {
     gameRoomID = gameRoomId;
-    color = 'white'
+    color = 'white';
+    lblPieceColor.innerText = color;
+    lblGameId.innerHTML = "Game ID: " + gameRoomID;
+    btnNewGame.disabled = true;
+    btnJoinGame.disabled = true;
     console.log(gameRoomID);
     players = 1;
 });
@@ -39,17 +47,23 @@ socket.on("move", (msg) => {
     console.log("Move Recieved");
     game.move(msg.move);
     board.position(msg.board);
+    updateStatus();
 });
 
 socket.on("joinGameSuccess", (msg) => {
     gameRoomID = parseInt(msg);
     players = 2;
     color = 'black';
+    lblPieceColor.innerText = color;
     play = false;
+    lblGameId.innerHTML = "Game ID: " + gameRoomID;
+    btnNewGame.disabled = true;
+    btnJoinGame.disabled = true;
 });
 
 socket.on("gameOver", (gameRoomId) => {
-   gameRoomID = null;
+    socket.leave(gameRoomId);
+    gameOver();
 });
 
 function newGame(){
@@ -57,6 +71,14 @@ function newGame(){
     socket.emit('newGame', function () {
         console.log("New Game Request Initiated");
     });
+}
+
+function gameOver(){
+    gameRoomID = null;
+    alert("Game Over");
+    lblGameId.innerHTML = "Game ID: " + gameRoomID;
+    btnNewGame.disabled = false;
+    btnJoinGame.disabled = false;
 }
 
 function joinGame() {
@@ -85,8 +107,9 @@ function onDrop (source, target) {
     });
 
     if (game.game_over()) {
+        socket.emit('move', {move: move, board: game.fen(), room: gameRoomID});
         socket.emit('gameOver', gameRoomID);
-        gameRoomID = null;
+        gameOver();
     }
 
     // illegal move
@@ -115,12 +138,15 @@ function updateStatus () {
 
     // checkmate?
     if (game.in_checkmate()) {
-        status = 'Game over, ' + moveColor + ' is in checkmate.'
+        status = 'Game over, ' + moveColor + ' is in checkmate.';
+        socket.emit('gameOver', gameRoomID);
+
     }
 
     // draw?
     else if (game.in_draw()) {
-        status = 'Game over, drawn position'
+        status = 'Game over, drawn position';
+        socket.emit('gameOver', gameRoomID);
     }
 
     // game still on
