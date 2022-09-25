@@ -4,28 +4,97 @@ let game = new Chess();
 let $status = $('#status');
 let $fen = $('#fen');
 let $pgn = $('#pgn');
+let txtJoinGame = document.getElementById('txtJoinGame');
 
-function onDragStart (source, piece, position, orientation) {
-    // do not pick up pieces if the game is over
-    if (game.game_over()) return false;
+let socket = io('/', {transports: ['websocket'], upgrade: false});
+let color;
+let players;
+let gameRoomID;
+let play = true;
 
-    // only pick up pieces for the side to move
-    if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-        return false
-    }
+socket.on('connection', () => {
+    console.log("Connected to Socket");
+});
+
+socket.on("newGameSuccess", function (gameRoomId) {
+    gameRoomID = gameRoomId;
+    color = 'white'
+    console.log(gameRoomID);
+    players = 1;
+});
+
+socket.on("Error", (msg) => {
+    console.log(msg);
+});
+
+socket.on("playerCountExceed", (msg) => {
+    console.log(msg);
+});
+
+socket.on("success", () => {
+    play = false;
+});
+
+socket.on("move", (msg) => {
+    console.log("Move Recieved");
+    game.move(msg.move);
+    board.position(msg.board);
+});
+
+socket.on("joinGameSuccess", (msg) => {
+    gameRoomID = parseInt(msg);
+    players = 2;
+    color = 'black';
+    play = false;
+});
+
+socket.on("gameOver", (gameRoomId) => {
+   gameRoomID = null;
+});
+
+function newGame(){
+    console.log("Function newGame initiated");
+    socket.emit('newGame', function () {
+        console.log("New Game Request Initiated");
+    });
 }
+
+function joinGame() {
+    socket.emit('joinGame', txtJoinGame.value);
+    console.log("Game room join request initiated from client: " + txtJoinGame.value);
+}
+
+function onDragStart (source, piece) {
+
+    // A few more rules have been added
+    if (game.game_over() === true || play ||
+        (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+        (game.turn() === 'b' && piece.search(/^w/) !== -1) ||
+        (game.turn() === 'w' && color === 'black') ||
+        (game.turn() === 'b' && color === 'white') ) {
+        return false;
+    }
+};
 
 function onDrop (source, target) {
     // see if the move is legal
-    var move = game.move({
+    let move = game.move({
         from: source,
         to: target,
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
-    })
+    });
+
+    if (game.game_over()) {
+        socket.emit('gameOver', gameRoomID);
+        gameRoomID = null;
+    }
 
     // illegal move
-    if (move === null) return 'snapback'
+    if (move === null) return 'snapback';
+    else {
+        console.log("Move detected: " + move + " Game Fen: " +  game.fen() + " Room: " + gameRoomID);
+        socket.emit('move', {move: move, board: game.fen(), room: gameRoomID});
+    }
 
     updateStatus()
 }
@@ -39,7 +108,7 @@ function onSnapEnd () {
 function updateStatus () {
     var status = ''
 
-    var moveColor = 'White'
+    var moveColor = 'White';
     if (game.turn() === 'b') {
         moveColor = 'Black'
     }
@@ -56,7 +125,7 @@ function updateStatus () {
 
     // game still on
     else {
-        status = moveColor + ' to move'
+        status = moveColor + ' to move';
 
         // check?
         if (game.in_check()) {
@@ -64,18 +133,20 @@ function updateStatus () {
         }
     }
 
-    $status.html(status)
-    $fen.html(game.fen())
-    $pgn.html(game.pgn())
+    $status.html(status);
+    $fen.html(game.fen());
+    $pgn.html(game.pgn());
 }
 
 var config = {
+    orientation: color,
     draggable: true,
     position: 'start',
     onDragStart: onDragStart,
     onDrop: onDrop,
     onSnapEnd: onSnapEnd
 }
-board = Chessboard('chessboard', config)
+board = Chessboard('chessboard', config);
 
-updateStatus()
+updateStatus();
+
